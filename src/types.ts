@@ -5,7 +5,7 @@ type FlattenIndex<T extends RouteBase> =
 	T extends Record<string, infer P>
 		? P extends RouteSchema
 			? T
-			: T extends Record<"", infer Root>
+			: T extends Record<string, infer Root>
 				? Root extends RouteBase
 					? FlattenIndex<Root>
 					: T
