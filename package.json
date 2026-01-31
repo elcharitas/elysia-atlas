@@ -1,6 +1,6 @@
 {
     "name": "elysia-atlas",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Strictly typed file-system router and autoloader for ElysiaJS",
     "author": {
         "name": "Jonathan Irhodia",

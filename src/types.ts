@@ -1,5 +1,14 @@
 import type Elysia from "elysia";
-import type { CreateEden } from "elysia";
+import type { CreateEden, RouteBase, RouteSchema } from "elysia";
+
+type FlattenIndex<T extends RouteBase> =
+	T extends Record<string, infer P>
+		? P extends RouteSchema
+			? T
+			: string extends keyof T
+				? T[string]
+				: T
+		: never;
 
 export type WithBasePath<App, Prefix extends string> = App extends Elysia<
 	infer BasePath,
@@ -15,7 +24,9 @@ export type WithBasePath<App, Prefix extends string> = App extends Elysia<
 			Singleton,
 			Definitions,
 			Metadata,
-			CreateEden<Prefix, Routes>,
+			FlattenIndex<CreateEden<Prefix, Routes>> extends RouteBase
+				? FlattenIndex<CreateEden<Prefix, Routes>>
+				: never,
 			Ephemeral,
 			Volatile
 		>

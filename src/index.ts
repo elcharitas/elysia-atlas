@@ -1,12 +1,12 @@
-import Elysia from "elysia";
 import { join, resolve } from "node:path";
+import Elysia from "elysia";
 
 /**
  * Autoload routes from a directory.
  * @param options - Options for autoloading routes.
  * @returns The autoloaded routes.
  */
-export async function autoload<T = Elysia> ( options: {
+export async function autoload<T = Elysia>(options: {
 	/**
 	 * The directory to autoload routes from.
 	 */
@@ -17,9 +17,9 @@ export async function autoload<T = Elysia> ( options: {
 	prefix?: string;
 	/**
 	 * Whether to generate type definitions for the routes.
-	 * 
+	 *
 	 * This can be a boolean or a string representing the output path.
-	 * 
+	 *
 	 * @default false
 	 */
 	typegen?: boolean | string;
