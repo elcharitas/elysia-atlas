@@ -11,7 +11,13 @@
         "baseUrl": ".",
         "declaration": true,
         "allowSyntheticDefaultImports": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "dist",
+        "paths": {
+            "elysia-atlas/*": [
+                "./src/*"
+            ]
+        }
     },
     "include": [
         "src"

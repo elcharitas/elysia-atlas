@@ -1,8 +1,7 @@
-import { Glob } from "bun";
 import Elysia from "elysia";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
-export async function autoload<T extends Elysia = Elysia>(options: {
+export async function autoload<T = Elysia>(options: {
 	dir: string;
 	prefix?: string;
 	typegen?: boolean | string;
@@ -16,6 +15,7 @@ export async function autoload<T extends Elysia = Elysia>(options: {
 
 		await generateTypes({
 			dir: options.dir,
+			prefix: options.prefix,
 			output,
 		});
 	}
@@ -25,24 +25,18 @@ export async function autoload<T extends Elysia = Elysia>(options: {
 		seed: options.dir,
 	});
 
-	const glob = new Glob("**/*.ts");
-
-	for await (const path of glob.scan({ cwd: options.dir, absolute: false })) {
+	for await (const path of new Bun.Glob("**/*.ts").scan({ cwd: options.dir })) {
 		if (path.endsWith(".d.ts")) continue;
 
-		const fullPath = join(options.dir, path);
-		const module = await import(fullPath);
+		const module = await import(resolve(options.dir, path));
 
-		// Check if verify export default is a function
-		if (typeof module.default !== "function") {
-			throw new Error(
-				`Failed to autoload "${path}". Main export must be a function that accepts an Elysia instance.`,
-			);
-		}
-		const fullRoutePath = join(options.prefix ?? "/", path)
-			.replace(/\/index\.ts$/, "")
-			.replace(/\.ts$/, "");
-		app.group(fullRoutePath, module.default);
+		if (typeof module.default !== "function")
+			throw new Error(`autoload: "${path}" must export a function`);
+
+		app.group(
+			join(options.prefix ?? "/", path).replace(/\/index\.ts$|\.ts$/, ""),
+			module.default,
+		);
 	}
 
 	return app as T;
