@@ -5,7 +5,6 @@ import type { AutoloadedRoutes } from "./routes";
 export const app = new Elysia()
     .use(await autoload<AutoloadedRoutes>({
         dir: "./example/routes",
-        prefix: "/api",
         typegen: true
     }))
     .listen(3001);
