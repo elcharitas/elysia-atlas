@@ -45,7 +45,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "rm -rf dist && bun build ./src/index.ts --outdir ./dist --target bun --minify --external elysia && tsc --project tsconfig.json --emitDeclarationOnly",
+        "build": "rm -rf dist && bun build ./src/index.ts ./src/typegen.ts --outdir ./dist --target bun --minify --splitting --external elysia && tsc --project tsconfig.json --emitDeclarationOnly",
         "prepublishOnly": "bun test && bun run build",
         "test": "bun test"
     }
