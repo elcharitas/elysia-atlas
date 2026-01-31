@@ -5,11 +5,15 @@ type FlattenIndex<T extends RouteBase> =
 	T extends Record<string, infer P>
 		? P extends RouteSchema
 			? T
-			: T extends Record<string, infer Root>
+			: T extends Record<"", infer Root>
 				? Root extends RouteBase
 					? FlattenIndex<Root>
-					: T
-				: T
+					: never
+				: T extends Record<string, infer P>
+					? P extends RouteSchema
+						? FlattenIndex<T>
+						: T
+					: never
 		: never;
 
 export type WithBasePath<App, Prefix extends string> = App extends Elysia<
