@@ -6,6 +6,10 @@ Advanced file-system router for [ElysiaJS](https://elysiajs.com/) featuring **au
 
 [![npm](https://img.shields.io/npm/v/elysia-atlas?logo=npm&style=flat&labelColor=000&color=3b82f6)](https://www.npmjs.org/package/elysia-atlas)
 [![npm downloads](https://img.shields.io/npm/dw/elysia-atlas?logo=npm&style=flat&labelColor=000&color=3b82f6)](https://www.npmjs.org/package/elysia-atlas)
+[![GitHub License](https://img.shields.io/github/license/elcharitas/elysia-atlas?logo=github&style=flat&labelColor=000&color=3b82f6)](https://github.com/elcharitas/elysia-atlas/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/elcharitas/elysia-atlas?logo=github&style=flat&labelColor=000&color=3b82f6)](https://github.com/elcharitas/elysia-atlas/stargazers)
+[![Bundlephobia](https://img.shields.io/bundlephobia/minzip/elysia-atlas?logo=npm&style=flat&labelColor=000&color=3b82f6)](https://bundlephobia.com/package/elysia-atlas)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3.0-black?logo=bun&style=flat&labelColor=000&color=3b82f6)](https://bun.sh)
 
 </div>
 
