@@ -16,24 +16,33 @@ type FlattenIndex<T extends RouteBase> =
 					: never
 		: never;
 
+/**
+ * Extracts routes from an Elysia app type and prefixes them.
+ *
+ * Only the Routes type parameter is carried forward — all other Elysia type
+ * parameters (Singleton, Definitions, Metadata, Ephemeral, Volatile) are reset
+ * to `any`. This prevents intersections of multiple `WithBasePath` results
+ * from collapsing non-route type parameters to `never`, which would break
+ * Eden Treaty's `Elysia<any, …>` constraint.
+ */
 export type WithBasePath<App, Prefix extends string> = App extends Elysia<
-	infer BasePath,
-	infer Singleton,
-	infer Definitions,
-	infer Metadata,
+	any,
+	any,
+	any,
+	any,
 	infer Routes,
-	infer Ephemeral,
-	infer Volatile
+	any,
+	any
 >
 	? Elysia<
-			BasePath,
-			Singleton,
-			Definitions,
-			Metadata,
+			any,
+			any,
+			any,
+			any,
 			FlattenIndex<CreateEden<Prefix, Routes>> extends RouteBase
 				? FlattenIndex<CreateEden<Prefix, Routes>>
-				: never,
-			Ephemeral,
-			Volatile
+				: Routes,
+			any,
+			any
 		>
 	: never;

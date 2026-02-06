@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "types": [
+            "bun-types"
+        ],
+        "strict": true,
+        "skipLibCheck": true,
+        "baseUrl": ".",
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "elysia-atlas/*": [
+                "./src/*"
+            ]
+        }
+    },
+    "include": [
+        "src",
+        "test",
+        "example"
+    ]
+}
