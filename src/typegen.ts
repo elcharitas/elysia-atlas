@@ -35,7 +35,10 @@ export async function generateTypes(options: {
 		);
 		typeIds.push([
 			typeId,
-			p.join(options.prefix ?? "/", file).replace(/\/index\.ts$|\.ts$/, ""),
+			p
+				.join(options.prefix ?? "/", file)
+				.replace(/\/index\.ts$|\.ts$/, "")
+				.replace(/\[([^\]]+)\]/g, ":$1"),
 		] as const);
 	});
 

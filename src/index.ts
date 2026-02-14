@@ -52,7 +52,9 @@ export async function autoload<T = Elysia>(options: {
 			throw new Error(`autoload: "${path}" must export a function`);
 
 		app.group(
-			join(options.prefix ?? "/", path).replace(/\/index\.ts$|\.ts$/, ""),
+			join(options.prefix ?? "/", path)
+				.replace(/\/index\.ts$|\.ts$/, "")
+				.replace(/\[([^\]]+)\]/g, ":$1"),
 			module.default,
 		);
 	}
