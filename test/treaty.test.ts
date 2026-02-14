@@ -222,6 +222,34 @@ describe("Treaty - Nested Directory Routes", () => {
 		expect(data).toHaveProperty("totalUsers");
 		expect(data).toHaveProperty("activeUsers");
 	});
+
+	it("should access dynamic admin/analytics/[section] via treaty", async () => {
+		const client = treaty<typeof app>(app);
+
+		const { data, error } = await client.admin
+			.analytics({ section: "users" })
+			.get();
+		expect(error).toBeNull();
+		expect(data).toHaveProperty("totalUsers", 1250);
+		expect(data).toHaveProperty("activeUsers", 420);
+		expect(data).toHaveProperty("newSignups", 35);
+		expect(data).toHaveProperty("period", "7d");
+	});
+
+	it("should access dynamic admin/analytics/[section] with query params via treaty", async () => {
+		const client = treaty<typeof app>(app);
+
+		const { data, error } = await client.admin
+			.analytics({ section: "revenue" })
+			.get({
+				query: { period: "30d" },
+			});
+		expect(error).toBeNull();
+		expect(data).toHaveProperty("totalUsers", 1250);
+		expect(data).toHaveProperty("activeUsers", 420);
+		expect(data).toHaveProperty("newSignups", 35);
+		expect(data).toHaveProperty("period", "30d");
+	});
 });
 
 describe("Treaty - With Prefix", () => {
@@ -267,7 +295,7 @@ describe("Treaty - SDK Pattern", () => {
 		type AppType = typeof app;
 
 		const createClient = (url: string | AppType) => {
-			const client = treaty<AppType>(url as any);
+			const client = treaty<AppType>(url);
 			return new Proxy({} as typeof client, {
 				get(_, prop) {
 					return Reflect.get(client, prop);
@@ -281,11 +309,12 @@ describe("Treaty - SDK Pattern", () => {
 		expect(error).toBeNull();
 		expect(data).toHaveProperty("status", "ok");
 
-		const { data: signInData, error: signInError } =
-			await sdk.auth["sign-in"].post({
-				email: "test@test.com",
-				password: "password123",
-			});
+		const { data: signInData, error: signInError } = await sdk.auth[
+			"sign-in"
+		].post({
+			email: "test@test.com",
+			password: "password123",
+		});
 		expect(signInError).toBeNull();
 		expect(signInData).toHaveProperty("token");
 	});
