@@ -1,6 +1,28 @@
 import { mkdirSync } from "node:fs";
 import * as p from "node:path";
 
+const normalizeSeparators = (value: string) => value.replace(/\\/g, "/");
+
+export const toTypeImportPath = (output: string, dir: string, file: string) => {
+	let relativeImportPath = p.relative(p.dirname(output), p.join(dir, file));
+	relativeImportPath = normalizeSeparators(relativeImportPath);
+
+	if (!relativeImportPath.startsWith(".")) {
+		relativeImportPath = `./${relativeImportPath}`;
+	}
+
+	return relativeImportPath.substring(
+		0,
+		relativeImportPath.length - p.extname(relativeImportPath).length,
+	);
+};
+
+export const toRouteLiteral = (filePath: string, prefix = "/") =>
+	p.posix
+		.join(normalizeSeparators(prefix), normalizeSeparators(filePath))
+		.replace(/\/index\.ts$|\.ts$/, "")
+		.replace(/\[([^\]]+)\]/g, ":$1");
+
 export async function generateTypes(options: {
 	dir: string;
 	output: string;
@@ -15,30 +37,21 @@ export async function generateTypes(options: {
 	// Sort for stable output
 	files.sort();
 
-	const _outputDir = p.dirname(options.output);
 	const imports: string[] = [];
 	const typeIds: [string, string][] = [];
 
 	files.forEach((file, index) => {
 		const typeId = `Route${index}`;
-		let relativeImportPath = p.relative(
-			p.dirname(options.output),
-			p.join(options.dir, file),
+		const relativeImportPath = toTypeImportPath(
+			options.output,
+			options.dir,
+			file,
 		);
 
-		if (!relativeImportPath.startsWith(".")) {
-			relativeImportPath = `./${relativeImportPath}`;
-		}
-
-		imports.push(
-			`import type ${typeId} from "${relativeImportPath.substring(0, relativeImportPath.length - p.extname(relativeImportPath).length)}";`,
-		);
+		imports.push(`import type ${typeId} from "${relativeImportPath}";`);
 		typeIds.push([
 			typeId,
-			p
-				.join(options.prefix ?? "/", file)
-				.replace(/\/index\.ts$|\.ts$/, "")
-				.replace(/\[([^\]]+)\]/g, ":$1"),
+			toRouteLiteral(file, options.prefix ?? "/"),
 		] as const);
 	});
 
