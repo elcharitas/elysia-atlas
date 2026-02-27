@@ -1,5 +1,13 @@
-import { join, resolve } from "node:path";
+import { join, posix, resolve } from "node:path";
 import Elysia from "elysia";
+
+const normalizeSeparators = (value: string) => value.replace(/\\/g, "/");
+
+export const toRoutePath = (filePath: string, prefix = "/") =>
+	posix
+		.join(normalizeSeparators(prefix), normalizeSeparators(filePath))
+		.replace(/\/index\.ts$|\.ts$/, "")
+		.replace(/\[([^\]]+)\]/g, ":$1");
 
 /**
  * Autoload routes from a directory.
@@ -10,7 +18,7 @@ export async function autoload<T = Elysia>(options: {
 	/**
 	 * The directory to autoload routes from.
 	 */
-	dir: string;
+	dir?: string;
 	/**
 	 * The prefix to apply to all routes.
 	 */
@@ -24,15 +32,17 @@ export async function autoload<T = Elysia>(options: {
 	 */
 	typegen?: boolean | string;
 }): Promise<T> {
+	const dir = options.dir ?? "./routes";
+
 	if (options.typegen) {
 		const { generateTypes } = await import("./typegen");
 		const output =
 			typeof options.typegen === "string"
 				? options.typegen
-				: join(options.dir, "../routes.d.ts");
+				: join(dir, "../routes.d.ts");
 
 		await generateTypes({
-			dir: options.dir,
+			dir,
 			prefix: options.prefix,
 			output,
 		});
@@ -40,23 +50,18 @@ export async function autoload<T = Elysia>(options: {
 
 	const app = new Elysia({
 		name: "autoload",
-		seed: options.dir,
+		seed: dir,
 	});
 
-	for await (const path of new Bun.Glob("**/*.ts").scan({ cwd: options.dir })) {
+	for await (const path of new Bun.Glob("**/*.ts").scan({ cwd: dir })) {
 		if (path.endsWith(".d.ts")) continue;
 
-		const module = await import(resolve(options.dir, path));
+		const module = await import(resolve(dir, path));
 
 		if (typeof module.default !== "function")
 			throw new Error(`autoload: "${path}" must export a function`);
 
-		app.group(
-			join(options.prefix ?? "/", path)
-				.replace(/\/index\.ts$|\.ts$/, "")
-				.replace(/\[([^\]]+)\]/g, ":$1"),
-			module.default,
-		);
+		app.group(toRoutePath(path, options.prefix ?? "/"), module.default);
 	}
 
 	return app as T;
