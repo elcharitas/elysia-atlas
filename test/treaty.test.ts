@@ -2,8 +2,8 @@ import { describe, expect, it } from "bun:test";
 import { treaty } from "@elysiajs/eden";
 import { Elysia } from "elysia";
 import { app } from "../example";
-import { autoload } from "../src/index";
 import type { AutoloadedRoutes } from "../example/routes";
+import { autoload } from "../src/index";
 
 describe("Treaty - Basic", () => {
 	it("should work with treaty for index route", async () => {
@@ -275,7 +275,7 @@ describe("Treaty - SDK Pattern", () => {
 		type AppType = typeof app;
 
 		const createSdk = (domain: string | AppType) => {
-			const client = treaty<AppType>(domain as any);
+			const client = treaty<AppType>(domain);
 			return client;
 		};
 

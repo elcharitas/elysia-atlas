@@ -1,8 +1,32 @@
 import { describe, expect, it } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Elysia } from "elysia";
 import { autoload } from "../src/index";
+import { generateTypes } from "../src/typegen";
 
 describe("Autoload - Basic", () => {
+	it("should support calling autoload without options", async () => {
+		mkdirSync("./routes", { recursive: true });
+		await Bun.write(
+			"./routes/index.ts",
+			`import { Elysia } from "elysia";
+
+export default (app: Elysia) => app.get("/", () => "default route");
+`,
+		);
+
+		try {
+			const app = new Elysia().use(await autoload());
+			const response = await app.handle(new Request("http://localhost/"));
+			expect(response.status).toBe(200);
+			expect(await response.text()).toBe("default route");
+		} finally {
+			rmSync("./routes", { recursive: true, force: true });
+		}
+	});
+
 	it("should autoload routes from directory", async () => {
 		const app = new Elysia().use(
 			await autoload({
@@ -43,9 +67,7 @@ describe("Autoload - Basic", () => {
 
 describe("Autoload - Complex Routes", () => {
 	it("should handle health endpoint returning JSON", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(new Request("http://localhost/health"));
 		expect(response.status).toBe(200);
@@ -55,9 +77,7 @@ describe("Autoload - Complex Routes", () => {
 	});
 
 	it("should handle GET with query parameters", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/users?page=2&limit=5"),
@@ -69,9 +89,7 @@ describe("Autoload - Complex Routes", () => {
 	});
 
 	it("should handle POST with body validation", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/posts", {
@@ -92,9 +110,7 @@ describe("Autoload - Complex Routes", () => {
 	});
 
 	it("should handle PUT with params and body", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/posts/1", {
@@ -111,9 +127,7 @@ describe("Autoload - Complex Routes", () => {
 	});
 
 	it("should handle DELETE with params", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/posts/2", {
@@ -126,9 +140,7 @@ describe("Autoload - Complex Routes", () => {
 	});
 
 	it("should handle PATCH with params and body", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/users/1", {
@@ -145,9 +157,7 @@ describe("Autoload - Complex Routes", () => {
 
 describe("Autoload - Nested Directories", () => {
 	it("should handle 2-level nested routes (auth/sign-in)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/auth/sign-in", {
@@ -166,9 +176,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 2-level nested routes (auth/sign-up)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/auth/sign-up", {
@@ -190,9 +198,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 2-level nested routes (auth/sign-out)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/auth/sign-out", {
@@ -205,9 +211,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 2-level nested routes with multiple sub-routes (auth/session)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		// Test GET session
 		const sessionRes = await app.handle(
@@ -228,9 +232,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 2-level nested routes with path params (auth/callback)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		// Test GET callback/:provider
 		const getRes = await app.handle(
@@ -255,9 +257,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 2-level nested routes (auth/verify-email)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/auth/verify-email", {
@@ -275,9 +275,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 2-level nested routes (admin/settings)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		// GET settings
 		const getRes = await app.handle(
@@ -304,9 +302,7 @@ describe("Autoload - Nested Directories", () => {
 	});
 
 	it("should handle 3-level nested routes (admin/analytics/overview)", async () => {
-		const app = new Elysia().use(
-			await autoload({ dir: "./example/routes" }),
-		);
+		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
 			new Request("http://localhost/admin/analytics/overview?period=30d"),
@@ -359,9 +355,7 @@ describe("Autoload - With Prefix", () => {
 			prefix: "/api",
 		});
 
-		const app = new Elysia()
-			.get("/root", () => "root")
-			.use(routes);
+		const app = new Elysia().get("/root", () => "root").use(routes);
 
 		// Root app route
 		const rootRes = await app.handle(new Request("http://localhost/root"));
@@ -428,5 +422,19 @@ describe("Autoload - Typegen", () => {
 		expect(content).toContain('"/api/users"');
 		expect(content).toContain('"/api/auth/sign-in"');
 		expect(content).toContain('"/api/admin/analytics/overview"');
+	});
+
+	it("should generate valid type definitions for an empty routes directory", async () => {
+		const emptyDir = mkdtempSync(join(tmpdir(), "atlas-empty-routes-"));
+		const output = join(emptyDir, "routes.d.ts");
+
+		await generateTypes({
+			dir: emptyDir,
+			output,
+		});
+
+		const content = await Bun.file(output).text();
+		expect(content).toContain("export type AutoloadedRoutes = Elysia;");
+		expect(content).not.toContain("export type AutoloadedRoutes = ;");
 	});
 });

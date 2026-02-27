@@ -56,13 +56,26 @@ export async function generateTypes(options: {
 	});
 
 	mkdirSync(p.dirname(options.output), { recursive: true });
+	const autoloadedImportLine = typeIds.length
+		? `import type { WithBasePath } from "elysia-atlas/types";`
+		: `import type Elysia from "elysia";`;
+
+	const autoloadedRoutesType =
+		typeIds.length === 0
+			? "Elysia"
+			: typeIds
+					.map(
+						([id, path]) => `WithBasePath<ReturnType<typeof ${id}>, "${path}">`,
+					)
+					.join(" & ");
+
 	await Bun.write(
 		options.output,
 		`/* eslint-disable */
 // @ts-nocheck
-import type { WithBasePath } from "elysia-atlas/types";
+${autoloadedImportLine}
 ${imports.join("\n")}
-export type AutoloadedRoutes = ${typeIds.map(([id, path]) => `WithBasePath<ReturnType<typeof ${id}>, "${path}">`).join(" & ")};
+export type AutoloadedRoutes = ${autoloadedRoutesType};
 `,
 	);
 }

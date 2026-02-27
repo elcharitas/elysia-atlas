@@ -14,24 +14,26 @@ export const toRoutePath = (filePath: string, prefix = "/") =>
  * @param options - Options for autoloading routes.
  * @returns The autoloaded routes.
  */
-export async function autoload<T = Elysia>(options: {
-	/**
-	 * The directory to autoload routes from.
-	 */
-	dir?: string;
-	/**
-	 * The prefix to apply to all routes.
-	 */
-	prefix?: string;
-	/**
-	 * Whether to generate type definitions for the routes.
-	 *
-	 * This can be a boolean or a string representing the output path.
-	 *
-	 * @default false
-	 */
-	typegen?: boolean | string;
-}): Promise<T> {
+export async function autoload<T = Elysia>(
+	options: {
+		/**
+		 * The directory to autoload routes from.
+		 */
+		dir?: string;
+		/**
+		 * The prefix to apply to all routes.
+		 */
+		prefix?: string;
+		/**
+		 * Whether to generate type definitions for the routes.
+		 *
+		 * This can be a boolean or a string representing the output path.
+		 *
+		 * @default false
+		 */
+		typegen?: boolean | string;
+	} = {},
+): Promise<T> {
 	const dir = options.dir ?? "./routes";
 
 	if (options.typegen) {
