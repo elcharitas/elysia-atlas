@@ -1,0 +1,120 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact version to release (e.g. 1.2.3). If set, bump input is ignored."
+        required: false
+        type: string
+      bump:
+        description: "Semver bump to apply when version is not provided."
+        required: false
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      release_title:
+        description: "Custom title for the release (e.g. 'Bug Fixes and Performance Improvements'). If not provided, defaults to 'Release v{version}'."
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: read
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Bump project version
+        id: bump
+        run: |
+          TARGET_VERSION=$(python - "${{ inputs.version }}" "${{ inputs.bump }}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          requested = sys.argv[1].strip()
+          bump = (sys.argv[2].strip() or 'patch')
+          package_json = Path('package.json')
+
+          with package_json.open('r', encoding='utf-8') as f:
+              data = json.load(f)
+              current = data['version']
+
+          if requested:
+              target = requested
+          else:
+              major, minor, patch = [int(x) for x in current.split('.')]
+              if bump == 'major':
+                  major, minor, patch = major + 1, 0, 0
+              elif bump == 'minor':
+                  minor, patch = minor + 1, 0
+              else:
+                  patch += 1
+              target = f"{major}.{minor}.{patch}"
+
+          data['version'] = target
+          with package_json.open('w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+          print(target)
+          PY
+          )
+
+          echo "version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Commit version bump
+        run: |
+          git add package.json
+          git commit -m "chore(release): bump versions to v${{ steps.bump.outputs.version }}"
+
+      - name: Sync dev with remote
+        run: |
+          git pull --rebase origin dev
+          git push origin dev
+
+      - name: Merge dev into main branch
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          git merge --no-ff dev -m "chore(release): merge dev for v${{ steps.bump.outputs.version }}"
+          git push origin main
+
+      - name: Create tag
+        run: |
+          TAG="v${{ steps.bump.outputs.version }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.bump.outputs.version }}"
+          if [ -n "${{ inputs.release_title }}" ]; then
+            TITLE="v${{ steps.bump.outputs.version }} - ${{ inputs.release_title }}"
+          else
+            TITLE="v${{ steps.bump.outputs.version }}"
+          fi
+          gh release create "$TAG" \
+            --title "$TITLE" \
+            --generate-notes
+
+      - name: Report new version
+        run: "echo 'New version: ${{ steps.bump.outputs.version }}'"
