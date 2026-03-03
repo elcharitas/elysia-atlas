@@ -1,10 +1,11 @@
-import { Elysia, t } from "elysia";
+import { t } from "elysia";
+import type { BaseApp } from "../../base";
 
-export default <T extends Elysia>(app: T) =>
+export default (app: BaseApp) =>
 	app
 		.get(
 			"",
-			({ query }) => {
+			() => {
 				return {
 					user: { id: "1", email: "test@test.com", name: "Test User" },
 					session: { id: "session-1", expiresAt: new Date().toISOString() },
@@ -28,8 +29,16 @@ export default <T extends Elysia>(app: T) =>
 			() => {
 				return {
 					sessions: [
-						{ id: "session-1", device: "Chrome", lastActive: new Date().toISOString() },
-						{ id: "session-2", device: "Firefox", lastActive: new Date().toISOString() },
+						{
+							id: "session-1",
+							device: "Chrome",
+							lastActive: new Date().toISOString(),
+						},
+						{
+							id: "session-2",
+							device: "Firefox",
+							lastActive: new Date().toISOString(),
+						},
 					],
 				};
 			},

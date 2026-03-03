@@ -1,11 +1,24 @@
-import { Elysia, t } from "elysia";
+import { t } from "elysia";
+import type { BaseApp } from "../base";
 
 const posts = [
-	{ id: "1", title: "First Post", content: "Hello World", authorId: "1", tags: ["intro"] },
-	{ id: "2", title: "Second Post", content: "More content", authorId: "2", tags: ["update"] },
+	{
+		id: "1",
+		title: "First Post",
+		content: "Hello World",
+		authorId: "1",
+		tags: ["intro"],
+	},
+	{
+		id: "2",
+		title: "Second Post",
+		content: "More content",
+		authorId: "2",
+		tags: ["update"],
+	},
 ];
 
-export default <T extends Elysia>(app: T) =>
+export default (app: BaseApp) =>
 	app
 		.get("", () => posts, {
 			detail: {
@@ -33,7 +46,11 @@ export default <T extends Elysia>(app: T) =>
 		.post(
 			"",
 			({ body }) => {
-				const newPost = { id: String(posts.length + 1), ...body, tags: body.tags ?? [] };
+				const newPost = {
+					id: String(posts.length + 1),
+					...body,
+					tags: body.tags ?? [],
+				};
 				posts.push(newPost);
 				return newPost;
 			},

@@ -1,37 +1,52 @@
-import { Elysia, t } from "elysia";
+import { t } from "elysia";
+import type { BaseApp } from "../base";
 
 const users = [
-	{ id: "1", name: "Elysia User", email: "user@elysia.dev", role: "admin" as const },
-	{ id: "2", name: "John Doe", email: "john@example.com", role: "member" as const },
+	{
+		id: "1",
+		name: "Elysia User",
+		email: "user@elysia.dev",
+		role: "admin" as const,
+	},
+	{
+		id: "2",
+		name: "John Doe",
+		email: "john@example.com",
+		role: "member" as const,
+	},
 ];
 
-export default <T extends Elysia>(app: T) =>
+export default (app: BaseApp) =>
 	app
 		.get("/user", () => ({ name: "Elysia User" }))
-		.get("", ({ query }) => {
-			const page = query?.page ?? 1;
-			const limit = query?.limit ?? 10;
-			return {
-				users,
-				pagination: {
-					page,
-					limit,
-					total: users.length,
-				},
-			};
-		}, {
-			query: t.Optional(
-				t.Object({
-					page: t.Optional(t.Number()),
-					limit: t.Optional(t.Number()),
-					search: t.Optional(t.String()),
-				}),
-			),
-			detail: {
-				tags: ["Users"],
-				description: "List all users with pagination",
+		.get(
+			"",
+			({ query }) => {
+				const page = query?.page ?? 1;
+				const limit = query?.limit ?? 10;
+				return {
+					users,
+					pagination: {
+						page,
+						limit,
+						total: users.length,
+					},
+				};
 			},
-		})
+			{
+				query: t.Optional(
+					t.Object({
+						page: t.Optional(t.Number()),
+						limit: t.Optional(t.Number()),
+						search: t.Optional(t.String()),
+					}),
+				),
+				detail: {
+					tags: ["Users"],
+					description: "List all users with pagination",
+				},
+			},
+		)
 		.get(
 			"/:id",
 			({ params }) => {
@@ -50,7 +65,11 @@ export default <T extends Elysia>(app: T) =>
 		.post(
 			"",
 			({ body }) => {
-				const newUser = { id: String(users.length + 1), ...body, role: "member" as const };
+				const newUser = {
+					id: String(users.length + 1),
+					...body,
+					role: "member" as const,
+				};
 				users.push(newUser);
 				return newUser;
 			},

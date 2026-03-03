@@ -1,4 +1,4 @@
-import type { Elysia } from "elysia";
+import type { BaseApp } from "../base";
 
-export default <T extends Elysia>(app: T) =>
+export default (app: BaseApp) =>
 	app.get("", () => ({ authenticated: true, userId: "123" }));

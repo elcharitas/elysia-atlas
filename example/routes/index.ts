@@ -1,4 +1,3 @@
-import type { Elysia } from "elysia";
+import type { BaseApp } from "../base";
 
-export default <T extends Elysia>(app: T) =>
-	app.get("/", () => "Hello from Example!");
+export default (app: BaseApp) => app.get("/", () => "Hello from Example!");

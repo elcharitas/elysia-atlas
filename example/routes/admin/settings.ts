@@ -1,4 +1,5 @@
-import { Elysia, t } from "elysia";
+import { t } from "elysia";
+import type { BaseApp } from "../../base";
 
 const settings: Record<string, string> = {
 	siteName: "My App",
@@ -6,7 +7,7 @@ const settings: Record<string, string> = {
 	language: "en",
 };
 
-export default <T extends Elysia>(app: T) =>
+export default (app: BaseApp) =>
 	app
 		.get("", () => settings, {
 			detail: {
