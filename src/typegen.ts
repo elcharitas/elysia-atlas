@@ -3,6 +3,9 @@ import * as p from "node:path";
 
 const normalizeSeparators = (value: string) => value.replace(/\\/g, "/");
 
+const isIntercept = (normalized: string) =>
+	normalized === "intercept.ts" || normalized.endsWith("/intercept.ts");
+
 export const toTypeImportPath = (output: string, dir: string, file: string) => {
 	let relativeImportPath = p.relative(p.dirname(output), p.join(dir, file));
 	relativeImportPath = normalizeSeparators(relativeImportPath);
@@ -31,10 +34,12 @@ export async function generateTypes(options: {
 	const files: string[] = [];
 
 	for await (const path of new Bun.Glob("**/*.ts").scan({ cwd: options.dir })) {
-		if (!path.endsWith(".d.ts")) files.push(path);
+		if (path.endsWith(".d.ts")) continue;
+		const normalized = normalizeSeparators(path);
+		if (isIntercept(normalized)) continue;
+		files.push(path);
 	}
 
-	// Sort for stable output
 	files.sort();
 
 	const imports: string[] = [];

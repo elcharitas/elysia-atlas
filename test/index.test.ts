@@ -279,7 +279,9 @@ describe("Autoload - Nested Directories", () => {
 
 		// GET settings
 		const getRes = await app.handle(
-			new Request("http://localhost/admin/settings"),
+			new Request("http://localhost/admin/settings", {
+				headers: { Authorization: "Bearer test-token" },
+			}),
 		);
 		expect(getRes.status).toBe(200);
 		const settings = await getRes.json();
@@ -290,7 +292,10 @@ describe("Autoload - Nested Directories", () => {
 		const putRes = await app.handle(
 			new Request("http://localhost/admin/settings", {
 				method: "PUT",
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer test-token",
+				},
 				body: JSON.stringify({
 					theme: "light",
 				}),
@@ -305,7 +310,9 @@ describe("Autoload - Nested Directories", () => {
 		const app = new Elysia().use(await autoload({ dir: "./example/routes" }));
 
 		const response = await app.handle(
-			new Request("http://localhost/admin/analytics/overview?period=30d"),
+			new Request("http://localhost/admin/analytics/overview?period=30d", {
+				headers: { Authorization: "Bearer test-token" },
+			}),
 		);
 		expect(response.status).toBe(200);
 		const data = await response.json();
@@ -344,7 +351,9 @@ describe("Autoload - With Prefix", () => {
 
 		// 3-level nested at /api/v1/admin/analytics/overview
 		const analyticsRes = await app.handle(
-			new Request("http://localhost/api/v1/admin/analytics/overview"),
+			new Request("http://localhost/api/v1/admin/analytics/overview", {
+				headers: { Authorization: "Bearer test-token" },
+			}),
 		);
 		expect(analyticsRes.status).toBe(200);
 	});

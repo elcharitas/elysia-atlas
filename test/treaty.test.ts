@@ -196,7 +196,9 @@ describe("Treaty - Nested Directory Routes", () => {
 	});
 
 	it("should access admin/settings via treaty", async () => {
-		const client = treaty<typeof app>(app);
+		const client = treaty<typeof app>(app, {
+			headers: { authorization: "Bearer test-token" },
+		});
 
 		const { data, error } = await client.admin.settings.get();
 		expect(error).toBeNull();
@@ -205,7 +207,9 @@ describe("Treaty - Nested Directory Routes", () => {
 	});
 
 	it("should update admin/settings via treaty", async () => {
-		const client = treaty<typeof app>(app);
+		const client = treaty<typeof app>(app, {
+			headers: { authorization: "Bearer test-token" },
+		});
 
 		const { data, error } = await client.admin.settings.put({
 			theme: "dark",
@@ -215,7 +219,9 @@ describe("Treaty - Nested Directory Routes", () => {
 	});
 
 	it("should access 3-level deep admin/analytics/overview via treaty", async () => {
-		const client = treaty<typeof app>(app);
+		const client = treaty<typeof app>(app, {
+			headers: { authorization: "Bearer test-token" },
+		});
 
 		const { data, error } = await client.admin.analytics.overview.get();
 		expect(error).toBeNull();
@@ -224,7 +230,9 @@ describe("Treaty - Nested Directory Routes", () => {
 	});
 
 	it("should access dynamic admin/analytics/[section] via treaty", async () => {
-		const client = treaty<typeof app>(app);
+		const client = treaty<typeof app>(app, {
+			headers: { authorization: "Bearer test-token" },
+		});
 
 		const { data, error } = await client.admin
 			.analytics({ section: "users" })
@@ -237,7 +245,9 @@ describe("Treaty - Nested Directory Routes", () => {
 	});
 
 	it("should access dynamic admin/analytics/[section] with query params via treaty", async () => {
-		const client = treaty<typeof app>(app);
+		const client = treaty<typeof app>(app, {
+			headers: { authorization: "Bearer test-token" },
+		});
 
 		const { data, error } = await client.admin
 			.analytics({ section: "revenue" })
