@@ -92,6 +92,55 @@ Files are mapped to routes based on their path relative to the `dir` option.
 | `routes/posts/index.ts` | `/posts` |
 | `routes/settings/profile.ts` | `/settings/profile` |
 
+## Intercepts
+
+Define an `intercept.ts` file in any route directory to intercept all routes in that directory and its subdirectories. Intercept files export a default function that receives an Elysia instance, just like route files.
+
+Intercepts are ideal for applying authentication checks, logging, or any logic that should run before handling requests for a group of routes.
+
+### Basic Usage
+
+```
+routes/
+├── intercept.ts        ← applies to ALL routes
+├── index.ts
+├── users.ts
+└── admin/
+    ├── intercept.ts    ← applies to /admin/* routes (stacks on root intercept)
+    ├── settings.ts
+    └── analytics/
+        └── overview.ts
+```
+
+```typescript
+// routes/intercept.ts — root-level intercept (logging, headers, etc.)
+import type { Elysia } from "elysia";
+
+export default <T extends Elysia>(app: T) =>
+    app.onBeforeHandle(({ set }) => {
+        set.headers["X-Request-Time"] = new Date().toISOString();
+    });
+```
+
+```typescript
+// routes/admin/intercept.ts — auth check for admin routes
+import type { Elysia } from "elysia";
+
+export default <T extends Elysia>(app: T) =>
+    app.onBeforeHandle(({ headers, set }) => {
+        if (!headers.authorization) {
+            set.status = 401;
+            return { error: "Unauthorized" };
+        }
+    });
+```
+
+### How It Works
+
+- **Intercept files are not registered as routes** — `intercept.ts` is excluded from both route loading and type generation.
+- **Intercepts stack from parent to child** — a route at `admin/settings.ts` receives the root `intercept.ts` first, then `admin/intercept.ts`.
+- **Same export pattern as routes** — the default export receives an Elysia app instance and returns it with hooks applied.
+
 ## Options
 
 | Key | Type | Default | Description |
