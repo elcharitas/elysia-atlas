@@ -1,6 +1,6 @@
 {
   "name": "elysia-atlas",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Strictly typed file-system router and autoloader for ElysiaJS",
   "author": {
     "name": "Jonathan Irhodia",
@@ -27,15 +27,15 @@
   "module": "./dist/index.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/index.js"
     },
     "./typegen": {
-      "types": "./dist/typegen.d.ts",
+      "types": "./dist/src/typegen.d.ts",
       "import": "./dist/typegen.js"
     },
     "./types": {
-      "types": "./dist/types.d.ts"
+      "types": "./dist/src/types.d.ts"
     }
   },
   "peerDependencies": {

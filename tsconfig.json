@@ -6,7 +6,7 @@
 		"types": ["bun-types"],
 		"strict": true,
 		"skipLibCheck": true,
-		"baseUrl": ".",
+		"rootDir": ".",
 		"declaration": true,
 		"allowSyntheticDefaultImports": true,
 		"forceConsistentCasingInFileNames": true,
