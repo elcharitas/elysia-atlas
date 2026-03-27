@@ -21,7 +21,7 @@ type FlattenIndex<T extends RouteBase> =
  * to prevent intersections from collapsing to `never` (breaking Eden Treaty).
  */
 export type WithBasePath<App, Prefix extends string> =
-	App extends Elysia<any, any, any, any, infer Routes, any, any>
+	App extends { "~Routes": infer Routes extends RouteBase }
 		? Elysia<
 				any,
 				any,
