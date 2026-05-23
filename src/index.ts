@@ -1,4 +1,5 @@
 import { join, posix, resolve } from "node:path";
+import { globSync } from "glob";
 import Elysia from "elysia";
 
 const normalizeSeparators = (value: string) => value.replace(/\\/g, "/");
@@ -84,7 +85,8 @@ export async function autoload<T = Elysia>(
 	const routePaths: string[] = [];
 	const absDir = resolve(dir);
 
-	for await (const path of new Bun.Glob("**/*.ts").scan({ cwd: dir })) {
+	const files = globSync("**/*.ts", { cwd: dir });
+	for (const path of files) {
 		if (path.endsWith(".d.ts")) continue;
 		const normalized = normalizeSeparators(path);
 		if (isIntercept(normalized)) {
@@ -103,9 +105,10 @@ export async function autoload<T = Elysia>(
 					throw new Error(
 						`autoload: intercept "${normalized}" must export a function`,
 					);
-				const dirKey = normalized === "intercept.ts"
-					? "."
-					: normalized.slice(0, -"/intercept.ts".length);
+				const dirKey =
+					normalized === "intercept.ts"
+						? "."
+						: normalized.slice(0, -"/intercept.ts".length);
 				return [dirKey, mod.default] as const;
 			}),
 		);

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	rmSync,
+	writeFileSync,
+	readFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Elysia } from "elysia";
@@ -93,7 +99,7 @@ describe("Intercept - Custom Directory", () => {
 	it("should load intercepts from a temporary directory structure", async () => {
 		const tmpDir = mkdtempSync(join(tmpdir(), "atlas-intercept-"));
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "intercept.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app.onBeforeHandle(({ set }) => {
@@ -101,14 +107,14 @@ export default (app: Elysia) => app.onBeforeHandle(({ set }) => {
 });`,
 		);
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "index.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app.get("/", () => "hello");`,
 		);
 
 		mkdirSync(join(tmpDir, "protected"));
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "protected", "intercept.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app.onBeforeHandle(({ headers, set }) => {
@@ -119,7 +125,7 @@ export default (app: Elysia) => app.onBeforeHandle(({ headers, set }) => {
 });`,
 		);
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "protected", "data.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app.get("", () => ({ secret: true }));`,
@@ -153,13 +159,13 @@ export default (app: Elysia) => app.get("", () => ({ secret: true }));`,
 	it("should skip intercept.ts from route generation", async () => {
 		const tmpDir = mkdtempSync(join(tmpdir(), "atlas-intercept-skip-"));
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "intercept.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app;`,
 		);
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "index.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app.get("/", () => "ok");`,
@@ -183,12 +189,12 @@ export default (app: Elysia) => app.get("/", () => "ok");`,
 	it("should throw if intercept.ts does not export a function", async () => {
 		const tmpDir = mkdtempSync(join(tmpdir(), "atlas-intercept-bad-"));
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "intercept.ts"),
 			`export default "not a function";`,
 		);
 
-		await Bun.write(
+		writeFileSync(
 			join(tmpDir, "index.ts"),
 			`import { Elysia } from "elysia";
 export default (app: Elysia) => app.get("/", () => "ok");`,
@@ -211,7 +217,7 @@ describe("Intercept - Typegen Exclusion", () => {
 			typegen: true,
 		});
 
-		const content = await Bun.file("./example/routes.d.ts").text();
+		const content = readFileSync("./example/routes.d.ts", "utf-8");
 		expect(content).not.toContain("intercept");
 		expect(content).toContain("AutoloadedRoutes");
 		expect(content).toContain("routes/health");
